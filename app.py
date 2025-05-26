@@ -6,17 +6,12 @@ import plotly.graph_objects as go
 import os
 from dotenv import load_dotenv
 
-# ======= CONFIG OPENAI =======
-import os
-from dotenv import load_dotenv
-
-# Carrega variáveis do .env
+# ========== SEGURANÇA: API KEY NO .env ==========
 load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
 if not openai_api_key:
     raise Exception("API KEY da OpenAI não encontrada no .env!")
 client = openai.OpenAI(api_key=openai_api_key)
-
 
 st.set_page_config(
     page_title="S&P 500 Insights",
@@ -90,8 +85,11 @@ with tab1:
         "Média Dividend Yield": f"{df_setor['Dividend_Yield'].mean():.2f}"
     }
     col1, col2, col3 = st.columns(3)
-    for idx, (k,v) in enumerate(kpis.items()):
-        [col1, col2, col3][idx].markdown(f"<div style='background:#181c22; padding:1.2rem 0.8rem; border-radius:14px; text-align:center;'><span style='color:#4F8BF9; font-size:1.6rem; font-weight:bold;'>{v}</span><br><span style='color:#eee'>{k}</span></div>", unsafe_allow_html=True)
+    for idx, (k, v) in enumerate(kpis.items()):
+        [col1, col2, col3][idx].markdown(
+            f"<div style='background:#181c22; padding:1.2rem 0.8rem; border-radius:14px; text-align:center;'>"
+            f"<span style='color:#4F8BF9; font-size:1.6rem; font-weight:bold;'>{v}</span><br>"
+            f"<span style='color:#eee'>{k}</span></div>", unsafe_allow_html=True)
 
     # Filtra outliers para P/E
     filtered_df = df_setor[(df_setor['Price_Earnings'] > 0) & (df_setor['Price_Earnings'] < df_setor['Price_Earnings'].quantile(0.98))]
@@ -101,7 +99,7 @@ with tab1:
     pe_hist = px.histogram(
         filtered_df, x="Price_Earnings", nbins=20,
         color_discrete_sequence=["#4F8BF9"],
-        labels={"Price_Earnings":"Price/Earnings"},
+        labels={"Price_Earnings": "Price/Earnings"},
         template="plotly_dark"
     )
     pe_hist.update_traces(hovertemplate='P/E: %{x}<br>Empresas: %{y}')
@@ -117,11 +115,11 @@ with tab1:
     bar_mc = px.bar(
         top_mc, x="Market_Cap", y="Name", orientation="h",
         color="Market_Cap", color_continuous_scale="blues",
-        labels={"Market_Cap":"Market Cap (USD)", "Name":"Empresa"},
+        labels={"Market_Cap": "Market Cap (USD)", "Name": "Empresa"},
         template="plotly_dark",
         height=350
     )
-    bar_mc.update_layout(yaxis={'categoryorder':'total ascending'}, plot_bgcolor="#181c22", paper_bgcolor="#181c22")
+    bar_mc.update_layout(yaxis={'categoryorder': 'total ascending'}, plot_bgcolor="#181c22", paper_bgcolor="#181c22")
     st.plotly_chart(bar_mc, use_container_width=True)
 
     st.markdown("#### Top 10 Dividend Yield")
@@ -151,7 +149,11 @@ with tab2:
     ]
     cols = st.columns(3)
     for i, (label, val, delta) in enumerate(cards):
-        cols[i].markdown(f"<div style='background:#181c22; padding:1.1rem 0.7rem; border-radius:14px; text-align:center;'><span style='color:#58B368; font-size:1.5rem; font-weight:bold;'>{val}</span><br><span style='color:#eee'>{label}</span><br><span style='color: #F97E4F; font-size:0.95rem;'>{delta}</span></div>", unsafe_allow_html=True)
+        cols[i].markdown(
+            f"<div style='background:#181c22; padding:1.1rem 0.7rem; border-radius:14px; text-align:center;'>"
+            f"<span style='color:#58B368; font-size:1.5rem; font-weight:bold;'>{val}</span><br>"
+            f"<span style='color:#eee'>{label}</span><br>"
+            f"<span style='color: #F97E4F; font-size:0.95rem;'>{delta}</span></div>", unsafe_allow_html=True)
 
     # Tabela de indicadores completos, com nomes legíveis
     st.markdown("#### Indicadores completos da empresa")
@@ -194,7 +196,7 @@ with tab2:
                 resposta = client.chat.completions.create(
                     model="gpt-3.5-turbo",
                     messages=[{"role": "user", "content": prompt}],
-                    max_tokens=550,
+                    max_tokens=1000,
                     temperature=0.7,
                 )
                 resumo = resposta.choices[0].message.content.strip()
@@ -207,7 +209,8 @@ with tab2:
         resumo = st.session_state['ia_cache_swot'].get(chave, "")
 
     if resumo:
-        st.info(resumo)
+        with st.expander("Ver análise completa da IA", expanded=True):
+            st.markdown(f"<div style='color:#ddd; font-size:1.05rem;'>{resumo.replace(chr(10), '<br>')}</div>", unsafe_allow_html=True)
     else:
         st.caption("Clique acima para gerar uma análise SWOT com IA para esta empresa.")
 
@@ -224,43 +227,67 @@ with tab3:
 
     st.markdown(f"<h4 style='color:#fff'><b>{empresa_a}</b> <span style='color:#aaa;font-size:1.3rem;'>&nbsp;vs&nbsp;</span> <b>{empresa_b}</b></h4>", unsafe_allow_html=True)
 
-    # Indicadores para comparação
-    indicadores = ['Price_Earnings', 'EBITDA', 'Market_Cap', 'Dividend_Yield']
-    a_vals = [df_a[x] for x in indicadores]
-    b_vals = [df_b[x] for x in indicadores]
+    # Indicadores para comparação (divididos por escala)
+    indicadores_grandes = ['Market_Cap', 'EBITDA']
+    indicadores_pequenos = ['Price_Earnings', 'Dividend_Yield']
+    a_vals_grandes = [df_a[x] for x in indicadores_grandes]
+    b_vals_grandes = [df_b[x] for x in indicadores_grandes]
+    a_vals_pequenos = [df_a[x] for x in indicadores_pequenos]
+    b_vals_pequenos = [df_b[x] for x in indicadores_pequenos]
 
-    # Barras agrupadas horizontais para leitura fácil
-    st.markdown("##### Comparação visual dos indicadores das empresas")
-    barras_fig = go.Figure(data=[
+    # Gráfico para indicadores grandes
+    st.markdown("##### Indicadores Financeiros (Market Cap, EBITDA)")
+    barras_fig_grandes = go.Figure(data=[
         go.Bar(
-            y=indicadores, x=a_vals,
+            y=indicadores_grandes, x=a_vals_grandes,
             orientation='h', name=empresa_a, marker_color="#4F8BF9"
         ),
         go.Bar(
-            y=indicadores, x=b_vals,
+            y=indicadores_grandes, x=b_vals_grandes,
             orientation='h', name=empresa_b, marker_color="#F97E4F"
         )
     ])
-    barras_fig.update_layout(
-        barmode='group', template="plotly_dark", height=380,
+    barras_fig_grandes.update_layout(
+        barmode='group', template="plotly_dark", height=220,
         plot_bgcolor="#181c22", paper_bgcolor="#181c22",
-        font_color="#e6e6e6", title="Comparação de Indicadores"
+        font_color="#e6e6e6"
     )
-    st.plotly_chart(barras_fig, use_container_width=True)
+    st.plotly_chart(barras_fig_grandes, use_container_width=True)
+
+    # Gráfico para indicadores pequenos
+    st.markdown("##### Indicadores Proporcionais (P/L, Dividend Yield)")
+    barras_fig_pequenos = go.Figure(data=[
+        go.Bar(
+            y=indicadores_pequenos, x=a_vals_pequenos,
+            orientation='h', name=empresa_a, marker_color="#4F8BF9"
+        ),
+        go.Bar(
+            y=indicadores_pequenos, x=b_vals_pequenos,
+            orientation='h', name=empresa_b, marker_color="#F97E4F"
+        )
+    ])
+    barras_fig_pequenos.update_layout(
+        barmode='group', template="plotly_dark", height=220,
+        plot_bgcolor="#181c22", paper_bgcolor="#181c22",
+        font_color="#e6e6e6"
+    )
+    st.plotly_chart(barras_fig_pequenos, use_container_width=True)
 
     # Cards comparativos abaixo dos gráficos
+    todos_indicadores = indicadores_grandes + indicadores_pequenos
+    a_vals_all = [df_a[x] for x in todos_indicadores]
+    b_vals_all = [df_b[x] for x in todos_indicadores]
     cols = st.columns(4)
-    for i, ind in enumerate(indicadores):
-        cols[i].markdown(f"""
-            <div style='background:#181c22; padding:1rem 0.7rem; border-radius:14px; text-align:center;'>
-                <span style='color:#4F8BF9; font-size:1.15rem; font-weight:bold;'>{a_vals[i]:,.2f}</span>
-                <br><span style='color:#eee'>{ind} ({empresa_a})</span>
-            </div>
-            <div style='background:#181c22; margin-top:0.7rem; padding:1rem 0.7rem; border-radius:14px; text-align:center;'>
-                <span style='color:#F97E4F; font-size:1.15rem; font-weight:bold;'>{b_vals[i]:,.2f}</span>
-                <br><span style='color:#eee'>{ind} ({empresa_b})</span>
-            </div>
-        """, unsafe_allow_html=True)
+    for i, ind in enumerate(todos_indicadores):
+        cols[i % 4].markdown(
+            f"<div style='background:#181c22; padding:1rem 0.7rem; border-radius:14px; text-align:center;'>"
+            f"<span style='color:#4F8BF9; font-size:1.15rem; font-weight:bold;'>{a_vals_all[i]:,.2f}</span>"
+            f"<br><span style='color:#eee'>{ind} ({empresa_a})</span>"
+            "</div>"
+            "<div style='background:#181c22; margin-top:0.7rem; padding:1rem 0.7rem; border-radius:14px; text-align:center;'>"
+            f"<span style='color:#F97E4F; font-size:1.15rem; font-weight:bold;'>{b_vals_all[i]:,.2f}</span>"
+            f"<br><span style='color:#eee'>{ind} ({empresa_b})</span>"
+            "</div>", unsafe_allow_html=True)
 
     # Botão IA: comparação
     if 'ia_cache_comp' not in st.session_state:
@@ -279,7 +306,7 @@ with tab3:
                 resposta = client.chat.completions.create(
                     model="gpt-3.5-turbo",
                     messages=[{"role": "user", "content": prompt}],
-                    max_tokens=600,
+                    max_tokens=1000,
                     temperature=0.7,
                 )
                 analise = resposta.choices[0].message.content.strip()
@@ -292,7 +319,8 @@ with tab3:
         analise = st.session_state['ia_cache_comp'].get(comp_key, "")
 
     if analise:
-        st.info(analise)
+        with st.expander("Ver análise completa da IA", expanded=True):
+            st.markdown(f"<div style='color:#ddd; font-size:1.05rem;'>{analise.replace(chr(10), '<br>')}</div>", unsafe_allow_html=True)
     else:
         st.caption("Selecione as empresas e clique para gerar uma análise IA da comparação.")
 
