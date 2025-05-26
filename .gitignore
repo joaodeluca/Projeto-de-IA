@@ -1,0 +1,35 @@
+# Arquivos de ambiente/segurança
+.env
+
+# Dados sensíveis
+*.key
+*.pem
+
+# Dados temporários ou de usuário
+*.pyc
+__pycache__/
+.DS_Store
+*.sqlite3
+*.log
+
+# Notebooks de saída e checkpoints do Jupyter
+.ipynb_checkpoints/
+*.ipynb_out
+
+# Diretórios de dependências
+venv/
+.env/
+.env.bak/
+.venv/
+*.egg-info/
+dist/
+build/
+
+
+
+# Dados do Streamlit
+.streamlit/
+
+# Configs do VSCode e PyCharm
+.vscode/
+.idea/
