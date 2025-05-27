@@ -1,3 +1,32 @@
+# =============================================================================
+# S&P 500 Insights – Histórico de Versões (Changelog Detalhado)
+#
+# Integrantes:
+#   Daniel Aloia Plastina    – RA: 10375596 
+#   Gustavo Henrique Fernandes Vieira – RA: 10400715 
+#   João Victor Silva de Luca Gonçalves – RA: 10401977 
+#
+# Histórico de Alterações:
+# 17/03/2025 – [Daniel] Criação inicial do notebook do projeto; importação das bibliotecas base (Pandas, Matplotlib, Seaborn); carregamento e inspeção inicial do dataset bruto do S&P 500.
+# 21/03/2025 – [Gustavo] Expansão da análise exploratória: geração de estatísticas descritivas (médias, medianas, desvios, máximos e mínimos); identificação e documentação de dados ausentes e inconsistentes; início da análise por setor.
+# 25/03/2025 – [João] Implementação de visualizações gráficas (boxplot e scatter plot) para mapeamento de outliers e padrões atípicos; análise de distribuição dos indicadores mais críticos para a modelagem.
+# 28/03/2025 – [João] Normalização dos dados quantitativos para comparação justa entre empresas; ajustes finais de limpeza de dados; preparação do dataset final para exploração avançada e futuras integrações.
+# 03/05/2025 – [Daniel] Estruturação inicial do dashboard interativo com Streamlit; configuração da arquitetura de abas e menus principais; integração básica do pipeline ETL para leitura e exibição dos dados.
+# 05/05/2025 – [Gustavo] Desenvolvimento dos primeiros gráficos interativos (histograma de Price/Earnings, barras horizontais para Market Cap e Dividend Yield); adaptação das métricas para exibição visual.
+# 07/05/2025 – [João] Padronização e validação avançada dos nomes das colunas; tratamento robusto de outliers; criação de funções utilitárias para preenchimento seguro dos dados ausentes em múltiplos indicadores; ajuste do código para performance.
+# 10/05/2025 – [Daniel] Finalização da aba "Visão Geral do Setor" com KPIs dinâmicos, rankings automáticos, cards e adaptação visual para todos os setores.
+# 13/05/2025 – [Gustavo] Desenvolvimento completo da aba "Empresa Selecionada", com cards comparativos entre empresa e média setorial; tabela detalhada de todos os indicadores financeiros da empresa.
+# 15/05/2025 – [João] Integração da API OpenAI/ChatGPT ao projeto: implementação dos prompts automáticos para análise SWOT e recomendações; testes e validação da resposta da IA; desenvolvimento do sistema de cache das análises geradas.
+# 17/05/2025 – [Daniel] Ajustes de layout para responsividade; melhorias na experiência do usuário; inclusão de cards de destaque para principais indicadores; documentação parcial do código.
+# 19/05/2025 – [Gustavo] Implementação inicial da aba de "Comparação de Empresas"; desenvolvimento da lógica para seleção dinâmica de pares; cards de valores e preparação da interface para gráficos comparativos.
+# 20/05/2025 – [João] Refino da visualização comparativa: separação dos gráficos em duas escalas (indicadores financeiros de grandeza e indicadores proporcionais); tratamento do layout visual e padronização dos cards para fácil leitura.
+# 21/05/2025 – [João] Otimização do sistema de cache para análises de comparação IA; inclusão de expansor para exibir recomendações e análises extensas sem cortes; personalização das cores, fontes e cards para identidade visual única do dashboard; documentação detalhada das funções e fluxos principais.
+# 22/05/2025 – [Gustavo] Testes extensivos de performance; tratamento avançado de exceções na comunicação com a OpenAI; revisão da segurança do .env e aprimoramento do .gitignore.
+# 24/05/2025 – [João] Revisão final para a segunda entrega: padronização e refatoração geral do código, detalhamento dos comentários, organização e melhoria da documentação inline e dos cabeçalhos; preparação do repositório público no GitHub.
+# 25/05/2025 – [Todos] Revisão coletiva do projeto, checagem final dos requisitos acadêmicos, atualização do README, revisão das referências, e fechamento do histórico de versões para publicação e apresentação final.
+# =============================================================================
+
+
 import streamlit as st
 import pandas as pd
 import openai
