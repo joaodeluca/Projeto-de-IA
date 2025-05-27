@@ -13,6 +13,8 @@ Preparar os dados para análises futuras: Os insights obtidos nesta etapa servir
 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Projeto-de-IA---2-Parte
 S&P 500 Insights – Parte 2
 💡 Visão Geral
 O S&P 500 Insights é um dashboard interativo e inteligente para análise financeira, comparação de empresas e geração automatizada de recomendações, usando inteligência artificial (ChatGPT) sobre os dados das empresas do índice S&P 500.
